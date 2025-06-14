@@ -159,7 +159,6 @@ public class HomeController : Controller
                     }
                     catch
                     {
-                        // ignoruj błędne funkcje
                     }
                 }
             }

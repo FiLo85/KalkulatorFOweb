@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container - WSZYSTKIE US£UGI MUSZ¥ BYÆ DODANE PRZED builder.Build()
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -22,17 +21,13 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// TUTAJ BUDUJEMY APLIKACJÊ - po tym momencie nie mo¿na ju¿ dodawaæ us³ug
 var app = builder.Build();
 
-// Ensure database is created - PRZENOSIMY TO PRZED KONFIGURACJÊ PIPELINE
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     context.Database.EnsureCreated();
 }
-
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
