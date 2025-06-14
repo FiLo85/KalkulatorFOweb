@@ -1,0 +1,267 @@
+﻿@model KalkulatorFOweb.Models.CalculatorViewModel
+@{
+    ViewData["Title"] = "Kalkulator Naukowy";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Kalkulator Naukowy</h3>
+                </div>
+                <div class="card-body">
+                    <div class="calculator">
+                        <div class="display-container mb-3">
+                            <input type="text" id="display" class="form-control form-control-lg text-end"
+                                   value="0" readonly style="font-size: 1.5rem; background-color: #f8f9fa;">
+                        </div>
+
+                        <div class="buttons-container">
+                            <!-- Pierwszy rząd - funkcje naukowe -->
+                            <div class="row mb-2">
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('sin(')">sin</button></div>
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('cos(')">cos</button></div>
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('tan(')">tan</button></div>
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('log(')">log</button></div>
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('ln(')">ln</button></div>
+                                <div class="col-2"><button class="btn btn-info btn-block" onclick="addFunction('sqrt(')">√</button></div>
+                            </div>
+
+                            <!-- Drugi rząd - stałe i potęgi -->
+                            <div class="row mb-2">
+                                <div class="col-2"><button class="btn btn-secondary btn-block" onclick="addToDisplay('π')">π</button></div>
+                                <div class="col-2"><button class="btn btn-secondary btn-block" onclick="addToDisplay('e')">e</button></div>
+                                <div class="col-2"><button class="btn btn-secondary btn-block" onclick="addToDisplay('^')">x²</button></div>
+                                <div class="col-2"><button class="btn btn-secondary btn-block" onclick="addToDisplay('(')">(</button></div>
+                                <div class="col-2"><button class="btn btn-secondary btn-block" onclick="addToDisplay(')')">)</button></div>
+                                <div class="col-2"><button class="btn btn-danger btn-block" onclick="clearDisplay()">C</button></div>
+                            </div>
+
+                            <!-- Trzeci rząd -->
+                            <div class="row mb-2">
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('7')">7</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('8')">8</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('9')">9</button></div>
+                                <div class="col-3"><button class="btn btn-warning btn-block" onclick="addToDisplay('/')">/</button></div>
+                            </div>
+
+                            <!-- Czwarty rząd -->
+                            <div class="row mb-2">
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('4')">4</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('5')">5</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('6')">6</button></div>
+                                <div class="col-3"><button class="btn btn-warning btn-block" onclick="addToDisplay('*')">*</button></div>
+                            </div>
+
+                            <!-- Piąty rząd -->
+                            <div class="row mb-2">
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('1')">1</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('2')">2</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('3')">3</button></div>
+                                <div class="col-3"><button class="btn btn-warning btn-block" onclick="addToDisplay('-')">-</button></div>
+                            </div>
+
+                            <!-- Szósty rząd -->
+                            <div class="row mb-2">
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('0')">0</button></div>
+                                <div class="col-3"><button class="btn btn-primary btn-block" onclick="addToDisplay('.')">.</button></div>
+                                <div class="col-3"><button class="btn btn-success btn-block" onclick="calculate()">=</button></div>
+                                <div class="col-3"><button class="btn btn-warning btn-block" onclick="addToDisplay('+')">+</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Historia obliczeń</h5>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearHistory()">Wyczyść</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="history-container" style="max-height: 400px; overflow-y: auto;">
+                            @if (Model.History.Any())
+                            {
+                                @foreach (var item in Model.History)
+                                {
+                                    <div class="history-item mb-2 p-2 border rounded">
+                                        <div class="expression text-muted small">@item.Expression</div>
+                                        <div class="result font-weight-bold">= @item.Result</div>
+                                        <div class="timestamp text-muted small">@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">Brak historii obliczeń</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Historia obliczeń</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Zaloguj się, aby zobaczyć historię swoich obliczeń.</p>
+                        <a href="/Identity/Account/Login" class="btn btn-primary">Zaloguj się</a>
+                        <a href="/Identity/Account/Register" class="btn btn-outline-primary">Zarejestruj się</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function addToDisplay(value) {
+        const display = document.getElementById('display');
+        if (display.value === '0' && value !== '.') {
+            display.value = value;
+        } else {
+            display.value += value;
+        }
+    }
+
+    function addFunction(func) {
+        const display = document.getElementById('display');
+        if (display.value === '0') {
+            display.value = func;
+        } else {
+            display.value += func;
+        }
+    }
+
+    function clearDisplay() {
+        document.getElementById('display').value = '0';
+    }
+
+    function calculate() {
+        const display = document.getElementById('display');
+        const expression = display.value;
+
+        fetch('/Home/Calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'expression=' + encodeURIComponent(expression)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                display.value = data.result;
+                if (@User.Identity.IsAuthenticated.ToString().ToLower()) {
+                    updateHistory();
+                }
+            } else {
+                alert('Błąd: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas obliczania');
+        });
+    }
+
+    function updateHistory() {
+        fetch('/Home/GetHistory')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('history-container');
+            container.innerHTML = '';
+
+            if (data.length > 0) {
+                data.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item mb-2 p-2 border rounded';
+                    historyItem.innerHTML = `
+                        <div class="expression text-muted small">${item.expression}</div>
+                        <div class="result font-weight-bold">= ${item.result}</div>
+                        <div class="timestamp text-muted small">${new Date(item.createdAt).toLocaleString('pl-PL')}</div>
+                    `;
+                    container.appendChild(historyItem);
+                });
+            } else {
+                container.innerHTML = '<p class="text-muted">Brak historii obliczeń</p>';
+            }
+        });
+    }
+
+    function clearHistory() {
+        if (confirm('Czy na pewno chcesz wyczyścić całą historię obliczeń?')) {
+            fetch('/Home/ClearHistory', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateHistory();
+                }
+            });
+        }
+    }
+
+    // Obsługa klawiatury
+    document.addEventListener('keydown', function(event) {
+        const key = event.key;
+
+        if ('0123456789+-*/.()'.includes(key)) {
+            addToDisplay(key);
+        } else if (key === 'Enter' || key === '=') {
+            calculate();
+        } else if (key === 'Escape' || key === 'c' || key === 'C') {
+            clearDisplay();
+        }
+    });
+</script>
+
+<style>
+    .calculator .btn {
+        margin: 2px;
+        flex: 1;
+        height: 50px;
+        width: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .history-item {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .history-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    #history-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    #history-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    #history-container::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    #history-container::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
